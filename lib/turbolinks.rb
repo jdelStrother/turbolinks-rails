@@ -11,6 +11,14 @@ module Turbolinks
       include Redirection
     end
   end
+  
+  module Request
+    TURBOLINKS_NONCE = "HTTP_TURBOLINKS_NONCE".freeze
+    
+    def generate_content_security_policy_nonce
+      get_header(TURBOLINKS_NONCE) || super
+    end
+  end
 
   class Engine < ::Rails::Engine
     config.turbolinks = ActiveSupport::OrderedOptions.new
@@ -22,6 +30,7 @@ module Turbolinks
         if app.config.turbolinks.auto_include
           include Controller
 
+          ::ActionDispatch::Request.prepend Request
           ::ActionDispatch::Assertions.include ::Turbolinks::Assertions
         end
       end
